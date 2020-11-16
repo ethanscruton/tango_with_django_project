@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+
+{% load static %}
+
+<html>
+    <head>
+        <h1>This tutorial has been put together by Ethan</h1><br />
+    </head>
+
+    <div>
+        <img src="{% static "images/michael.jpg" %}"
+           alt="Picture of Michael">
+    </div>
+
+    <div>
+        <img src="{{ MEDIA_URL}}BROCK.jpg"
+           alt="Picture of Brock">
+    </div>
+</html>
