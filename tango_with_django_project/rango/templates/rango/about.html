@@ -1,8 +1,11 @@
-<!DOCTYPE html>
-
+{% extends 'rango/base.html' %}
 {% load static %}
 
-<html>
+{% block title_block %}
+    About
+{% endblock %}
+
+{% block body_block %}
     <head>
         <h1>This tutorial has been put together by Ethan</h1><br />
     </head>
@@ -16,4 +19,4 @@
         <img src="{{ MEDIA_URL}}BROCK.jpg"
            alt="Picture of Brock">
     </div>
-</html>
+{% endblock %}
