@@ -9,10 +9,22 @@
     {% if category %}
         <h1>{{ category.name }}</h1>
 
+        <div>
+            <strong id="like_count">{{ category.likes }}</strong> people like this category
+            {% if user.is_authenticated %}
+                <button id="likes" data-catid="{{ category.id }}"
+                    class="btn btn-primary btn-small" type="button">
+                    Like
+                </button>
+            {% endif %}
+        </div>
+
         {% if pages %}
             <ul>
                 {% for page in pages %}
-                    <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+                    <li><a href="{% url 'rango:goto' %}?page_id={{ page.id }}">{{ page.title }}</a>
+                            ({{ page.views }} view{% if page.views != 1 %}s{% endif %})
+                    </li>
                 {% endfor %}
             </ul>
         {% else %}

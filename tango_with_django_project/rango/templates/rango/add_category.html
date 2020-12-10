@@ -10,14 +10,7 @@
             action="{% url 'rango:add_category' %}">
             <h2 class="form-signin-heading"> Add a Category </h2>
             {% csrf_token %}
-            {% for hidden in form.hidden_fields %}
-                {{ hidden }}
-            {% endfor %}
-            {% for field in form.visible_fields %}
-                {{ field.errors }}
-                {{ field.help_text }}<br/>
-                {{ field }}<br/>
-            {% endfor %}
+            {{ form.as_p }}
             <br/>
             <button class="btn btn-primary" type="submit" name="submit">
                 Add Category

@@ -1,17 +1,18 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from datetime import datetime
+from django.views.generic import ListView
+from django.views.generic.edit import CreateView, UpdateView
 
 # Import the Category and Page models
-from rango.models import Category, Page
-from rango.forms import CategoryForm, PageForm
+from rango.models import Category, Page, UserProfile
+from django.contrib.auth.models import User
 
-from rango.forms import UserForm, UserProfileForm
-
-# A helper method
+""" # A helper method
 def get_server_side_cookie(request, cookie, default_val=None):
     val = request.session.get(cookie)
     if not val:
@@ -59,175 +60,148 @@ def index(request):
     context_dict['visits'] = request.session['visits']
 
     # Return response back to the user, updating any cookies that need change.
-    return response
+    return response """
+
+class IndexView(ListView):
+    template_name = 'rango/index.html'
+    context_object_name = 'pages'
+    queryset = Page.objects.order_by('-views')[:5] 
+
+    def get_context_data(self):
+        context = super().get_context_data()
+        context['categories'] = Category.objects.order_by('-likes')[:5]
+        return context
 
 def about(request):
     context_dict = {}
-    visitor_cookie_handler(request)
-    context_dict['visits'] = request.session['visits']
+    #visitor_cookie_handler(request)
+    #context_dict['visits'] = request.session['visits']
     return render(request, 'rango/about.html', context_dict)
 
-def show_category(request, category_name_slug):
-    context_dict = {}
+class PageListView(ListView):
+    template_name = "rango/category.html"
+    context_object_name = "pages"
 
-    try:
-        category = Category.objects.get(slug=category_name_slug)
-
-        pages = Page.objects.filter(category=category)
-
-        context_dict['pages'] = pages
-
-        context_dict['category'] = category
-
-    except Category.DoesNotExist:
-        context_dict['category'] = None
-        context_dict['pages'] = None
-
-    return render(request, 'rango/category.html', context_dict)
-
-def add_category(request):
-    form = CategoryForm()
-
-    if request.method == 'POST':
-        form = CategoryForm(request.POST)
-
-        if form.is_valid():
-            form.save(commit=True)
-            return index(request)
-        else:
-            print(form.errors)
-
-    return render(request, 'rango/add_category.html', {'form': form})
-
-def add_page(request, category_name_slug):
-    try:
-        category = Category.objects.get(slug=category_name_slug)
-    except:
-        category = None
+    def get_queryset(self):
+        self.category = get_object_or_404(Category, slug=self.kwargs['category_name_slug'])
+        return Page.objects.filter(category=self.category).order_by('-views')
     
-    form = PageForm()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['category'] = self.category
+        return context
 
-    if request.method == 'POST':
-        form = PageForm(request.POST)
+def track_url(request):
+    page_id = None
+    url = 'rango/index/'
 
-        if form.is_valid():
-            if category:
-                page = form.save(commit=False)
-                page.category = category
-                page.views = 0
+    if request.method == 'GET':
+        if 'page_id' in request.GET:
+            page_id = request.GET['page_id']
+
+            try:
+                page = Page.objects.get(id=page_id)
+                page.views += 1
                 page.save()
-                return show_category(request, category_name_slug)
-        else:
-            print(form.errors)
-            
-    context_dict = {'form': form, 'category': category}
-    return render(request, 'rango/add_page.html', context_dict)
+                url = page.url
+            except:
+                pass
+                
+    return redirect(url)
 
-def register(request):
-    # A boolean value for telling the template
-    # whether the registration was successful.
-    # Set to False initially. Code changes value to
-    # True when registration succeeds.
-    registered = False
+class AddCategoryView(CreateView):
+    template_name = 'rango/add_category.html'
+    model = Category
+    fields = ['name']
 
-    # If it's a HTTP POST, we're interested in processing form data.
-    if request.method == 'POST':
-        # Attempt to grab information from the raw form information.
-        # Note that we make use of both UserForm and UserProfileForm.  
-        user_form = UserForm(data=request.POST)
-        profile_form = UserProfileForm(data=request.POST)
+class AddPageView(CreateView):
+    template_name = 'rango/add_page.html'
+    model = Page
+    fields = ['title', 'url']
 
-        if user_form.is_valid() and profile_form.is_valid():
-            # Save the user's form data to the database.
-            user = user_form.save()
+    def form_valid(self, form, **kwargs):
+        form.instance.category = get_object_or_404(Category, slug=self.kwargs['category_name_slug'])
+        return super().form_valid(form)
 
-            # Now we hash the password with the set_password method.
-            # Once hashed, we can update the user object.
-            user.set_password(user.password)
-            user.save()
-
-            # Now sort out the UserProfile instance.
-            # Since we need to set the user attribute ourselves,
-            # we set commit=False. This delays saving the model
-            # until we're ready to avoid integrity problems.
-            profile = profile_form.save(commit=False)
-            profile.user = user
-
-            # Did the user provide a profile picture?
-            # If so, we need to get it from the input form and
-            #put it in the UserProfile model.
-            if 'picture' in request.FILES:
-                profile.picture = request.FILES['picture']
-            
-            # Now we save the UserProfile model instance.
-            profile.save()
-
-            # Update our variable to indicate that the template
-            # registration was successful.
-            registered = True
-        else:
-            # Invalid form or forms - mistakes or something else?
-            # Print problems to the terminal.
-            print(user_form.errors, profile_form.errors)
-    else:
-        # Not a HTTP POST, so we render our form using two ModelForm instances.
-        # These forms will be blank, ready for user input.
-        user_form = UserForm()
-        profile_form = UserProfileForm()
-    
-    return render(request,
-                  'rango/register.html',
-                  {'user_form': user_form,
-                   'profile_form': profile_form,
-                   'registered': registered})
-
-
-def user_login(request):
-    # If the request is a HTTP POST, try to pull out the relevant information.
-    if request.method == 'POST':
-        # Gather the username and password provided by the user.
-        # This information is obtained from the login form.
-        # We use request.POST.get('<variable>') as opposed
-        # to request.POST['<variable>'], because the
-        # request.POST.get('<variable>') returns None if the
-        # value does not exist, while request.POST['<variable>']
-        # will raise a KeyError exception.
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-
-        # Use Django's machinery to attempt to see if the username/password
-        # combination is valid - a User object is returned if it is.
-        user = authenticate(username=username, password=password)
-
-        # If we have a User object, the details are correct.
-        # If None (Python's way of representing the absence of a value), no user
-        # with matching credentials was found.
-        if user:
-            # Is the account active? It could have been disabled.
-            if user.is_active:
-                # If the account is valid and active, we can log the user in.
-                # We'll send the user back to the homepage.
-                login(request, user)
-                return HttpResponseRedirect(reverse('index'))
-            else:
-                # An inactive account was used - no logging in!
-                return HttpResponse("Your rango account is disabled.")
-        else:
-            # Bad login details were provided. So we can't log the user in.
-            print("Invalid login details: {0}, {1}".format(username, password))
-            return HttpResponse("Invalid login details supplied.")
-
-    # The request is not a HTTP POST, so display the login form.
-    # This scenario would most likely be a HTTP GET.
-    else:
-        # No context variables to pass to the template system, hence the blank dict object.
-        return render(request, 'rango/login.html', {})
-
-@login_required
-def restricted(request):
-    return render(request, 'rango/restricted.html', {})
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['category'] = get_object_or_404(Category, slug=self.kwargs['category_name_slug'])
+        return context
 
 @login_required
 def user_logout(request):
     logout(request)
     return HttpResponseRedirect(reverse('index'))
+
+@method_decorator(login_required, name='dispatch')
+class RegisterProfileView(CreateView):
+    template_name = 'rango/profile_registration.html'
+    model = UserProfile
+    fields = ['website', 'picture']
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+@method_decorator(login_required, name='dispatch')
+class EditProfileView(UpdateView):
+    template_name = 'rango/profile.html'
+    model = UserProfile
+    fields = ['website', 'picture']
+    slug_field = 'user_slug'
+    slug_url_kwarg = 'user_slug'
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        user = User.objects.get(username=self.kwargs['user_slug'])
+        user_profile = UserProfile.objects.get(user=user)
+        context = super().get_context_data(**kwargs)
+        context['user_profile'] = user_profile
+        context['selected_user'] = user
+        return context
+
+@method_decorator(login_required, name='dispatch')
+class UserListView(ListView):
+    model = UserProfile
+    template_name = 'rango/users.html'
+    context_object_name = 'user_profiles'
+
+@login_required
+def like_category(request):
+    cat_id = None
+    if request.method == 'GET':
+        cat_id = request.GET['category_id']
+        likes = 0
+        if cat_id:
+            cat = Category.objects.get(id=int(cat_id))
+            if cat:
+                likes = cat.likes + 1
+                cat.likes = likes
+                cat.save()
+    return HttpResponse(likes)
+
+def get_category_list(max_results=0, starts_with=''):
+    cat_list = []
+    if starts_with:
+        cat_list = Category.objects.filter(name__istartswith=starts_with)
+
+    if max_results > 0:
+        if len(cat_list) > max_results:
+            cat_list = cat_list[:max_results]
+    return cat_list
+
+def suggest_category(request):
+    cat_list = []
+    starts_with = ''
+
+    if request.method == 'GET':
+        starts_with = request.GET['suggestion']
+    cat_list = get_category_list(8, starts_with)
+
+    if len(cat_list) == 0:
+            cat_list = Category.objects.order_by('-likes')
+
+    return render(request, 'rango/cats.html', {'cats': cat_list })

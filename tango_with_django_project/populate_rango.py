@@ -3,9 +3,10 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tango_with_django_project.setti
 
 import django
 django.setup()
-from rango.models import Category, Page
+from rango.models import Category, Page, UserProfile, User
 
 def populate():
+
     python_pages = [
         {"title": "Official Python Tutorial",
         "url":"http://docs.python.org/2/tutorial/",
@@ -38,7 +39,13 @@ def populate():
 
     cats = {"Python": {"pages": python_pages, "views": 128, "likes": 64},
             "Django": {"pages": django_pages, "views": 64, "likes": 32},
-            "Other Frameworks": {"pages": other_pages, "views": 32, "likes": 16} }
+            "Other Frameworks": {"pages": other_pages, "views": 32, "likes": 16},
+            "Pascal": {"pages": [], "views": 0, "likes": 0},
+            "Perl": {"pages": [], "views": 0, "likes": 0},
+            "PHP": {"pages": [], "views": 0, "likes": 0},
+            "Prolog": {"pages": [], "views": 0, "likes": 0},
+            "PostScript": {"pages": [], "views": 0, "likes": 0},
+            "Programming": {"pages": [], "views": 0, "likes": 0} }
 
     for cat, cat_data in cats.items():
         c = add_cat(cat, cat_data["views"], cat_data["likes"])
