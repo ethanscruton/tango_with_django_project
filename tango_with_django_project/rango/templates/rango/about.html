@@ -7,31 +7,13 @@
 
 {% block body_block %}
     <head>
-        <h1>This tutorial has been put together by Ethan</h1><br />
+        <h1>This tutorial has been put together by Ethan Scruton</h1><br />
     </head>
-
-    <button class="btn btn-primary"
-        onClick="alert('You clicked the button using JavaScript.');">
-        Click Me - I run JavaScript
-    </button>
-
-    <button class="btn btn-primary" id="about-btn">
-        Click Me - I'm JavaScript on Speed
-    </button>
-    <p>This is an example</p>
-    <p>This is another example</p>
-
-    <div>
-        Site has been visited {{ visits }} time(s).
-    </div>
-
-    <div>
-        <img src="{% static "images/michael.jpg" %}"
-           alt="Picture of Michael">
-    </div>
-
-    <div>
-        <img src="{{ MEDIA_URL}}BROCK.jpg"
-           alt="Picture of Brock">
-    </div>
+    
+    <p>
+        I was able to put this website together with the help of the book <a href='https://www.tangowithdjango.com/'>Tango With Django.</a>
+    </p>
+    <p>
+        The site allows users to add and like categories. Within each category, users can add and view webpages.
+    </p>
 {% endblock %}
