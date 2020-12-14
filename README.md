@@ -6,9 +6,9 @@ This project was put together with the help of the tutorial book [Tango With Dja
 I wanted to learn how to create both the backend and frontend aspect of a website. I chose Django as the framework because Python was my most familiar programming language.
 
 # Installation
-The website is currently hosted [here](https::/ethanscruton.pythonanywhere.com). However, the deployment site I am using requires me to log in every three months.  
+The website is currently hosted at ethanscruton.pythonanywhere.com. However, the deployment site I am using requires me to log in every three months.  
 
-If the website is expired, you can run the site by using the instructions listed below.  
+If the website listed above is expired, you can run the site by using the instructions listed below.  
 
 The first thing to do is to clone the repository:
 
