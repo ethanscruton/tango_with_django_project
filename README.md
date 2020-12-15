@@ -5,6 +5,22 @@ This project was put together with the help of the tutorial book [Tango With Dja
 # Motivation
 I wanted to learn how to create both the backend and frontend aspect of a website. I chose Django as the framework because Python was my most familiar programming language.
 
+# Screenshot examples
+Index page:  
+[Index!](https://pasteboard.co/JEWR0xc.png)
+
+Category page:
+[Category!](https://pasteboard.co/JEXlQNg.png)
+
+Add category page:
+[Add Category!](https://pasteboard.co/JEXlCDx.png)
+
+Add page:
+[Add Page!](https://pasteboard.co/JEXmwha.png)
+
+Register:
+[Register!](https://pasteboard.co/JEXmRe8.png)
+
 # Installation
 The website is currently hosted at ethanscruton.pythonanywhere.com. However, the deployment site I am using requires me to log in every three months.  
 
@@ -39,6 +55,7 @@ session operates in a virtual environment.
 
 Once `pip` has finished downloading the dependencies:
 ```sh
+(rango)$ python populate_rango.py
 (rango)$ python manage.py runserver
 ```
 
