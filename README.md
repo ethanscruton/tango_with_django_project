@@ -7,19 +7,19 @@ I wanted to learn how to create both the backend and frontend aspect of a websit
 
 # Screenshot examples
 Index page:  
-[Index!](https://pasteboard.co/JEWR0xc.png)
+![Index](https://pasteboard.co/JEWR0xc.png)
 
 Category page:
-[Category!](https://pasteboard.co/JEXlQNg.png)
+![Category](https://pasteboard.co/JEXlQNg.png)
 
 Add category page:
-[Add Category!](https://pasteboard.co/JEXlCDx.png)
+![Add Category](https://pasteboard.co/JEXlCDx.png)
 
 Add page:
-[Add Page!](https://pasteboard.co/JEXmwha.png)
+![Add Page](https://pasteboard.co/JEXmwha.png)
 
 Register:
-[Register!](https://pasteboard.co/JEXmRe8.png)
+![Register](https://pasteboard.co/JEXmRe8.png)
 
 # Installation
 The website is currently hosted at ethanscruton.pythonanywhere.com. However, the deployment site I am using requires me to log in every three months.  
